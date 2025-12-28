@@ -21,10 +21,12 @@
   },
   "homepage": "https://github.com/amanraval76593/LoMark-BE#readme",
   "dependencies": {
+    "@types/mongoose": "^5.11.96",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.0.2",
     "pg": "^8.16.3",
     "zod": "^4.2.1"
   },
