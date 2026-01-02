@@ -8,4 +8,18 @@ export class ProductRepository {
         return ProductModel.create(product)
     }
 
+    static async fetchBySellerId(sellerId: string, limit: number, cursor: string | undefined) {
+
+        const query = cursor ? { _id: { $lt: cursor }, sellerId: sellerId } : { sellerId: sellerId };
+
+        return ProductModel.find(query).sort({ _id: -1 }).limit(limit + 1);
+    }
+
+    static async fetchByLocation(limit: number, cursor: string | undefined) {
+
+        const query = cursor ? { _id: { $lt: cursor } } : {};
+
+        return ProductModel.find(query);
+    }
+
 }

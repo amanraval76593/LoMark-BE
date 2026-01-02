@@ -19,4 +19,13 @@ export class AuthController {
             next(err);
         }
     }
+
+    static async profile(req: Request, res: Response, next: NextFunction) {
+        try {
+            const user = req.user!;
+            res.status(200).json(user);
+        } catch (err) {
+            next(err)
+        }
+    }
 }
