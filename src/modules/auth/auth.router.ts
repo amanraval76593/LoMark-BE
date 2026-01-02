@@ -9,6 +9,7 @@ import { UserRole } from "./auth.type";
 const router = Router()
 
 router.post("/register", validate(RegisterSchema), AuthController.register)
-router.post("/login", authMiddleware, requireRole(UserRole.USER), validate(LoginSchema), AuthController.login)
+router.post("/login", authMiddleware, validate(LoginSchema), AuthController.login)
+router.get("/profile", authMiddleware, AuthController.profile)
 
 export default router;

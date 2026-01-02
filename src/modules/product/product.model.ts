@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { IProduct } from "./product.interface";
+import { ProductCategory } from "./product.type";
 
 const productSchema = new Schema<IProduct>({
     name: {
@@ -12,6 +13,7 @@ const productSchema = new Schema<IProduct>({
     },
     category: {
         type: String,
+        enum: ProductCategory,
         required: true,
         index: true
     },

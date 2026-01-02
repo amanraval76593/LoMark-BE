@@ -8,6 +8,8 @@ import { createProductSchema } from "./product.validation";
 
 const router = Router();
 
-router.post("/add-product", authMiddleware, requireRole(UserRole.FARMER), validate(createProductSchema), ProductController.addProduct)
+router.post("/add-product", authMiddleware, requireRole(UserRole.FARMER), validate(createProductSchema), ProductController.addProduct);
+router.get("/fetch-seller-products", authMiddleware, requireRole(UserRole.FARMER), ProductController.fetchProductForSeller);
+router.get("/fetch-product", authMiddleware, requireRole(UserRole.USER), ProductController.fetchProductByLocation)
 
 export default router;

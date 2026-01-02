@@ -1,4 +1,5 @@
 import config from "../../config";
+import { UserRow } from "../../database";
 import { BadRequestError, UnauthorizedError } from "../../errors/app.error";
 import { AuthResponse, LoginDTO, RegisterDTO } from "./auth.interface";
 import { AuthRepository } from "./auth.repository";

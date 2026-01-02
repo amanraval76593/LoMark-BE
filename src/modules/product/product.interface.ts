@@ -1,7 +1,9 @@
+import { ProductCategory } from "./product.type";
+
 export interface IProduct {
     name: string;
     description?: string;
-    category: string;
+    category: ProductCategory;
 
     price: number;
     unit: "kg" | "piece" | "litre" | "pack";
