@@ -49,7 +49,7 @@ export class ProductController {
         const limit = Math.min(Number(req.query.limit) || 10, 100);
         const cursor = req.query.cursor as string || undefined;
 
-        const productList = ProductService.fetchProductByLocation(limit, cursor);
+        const productList = await ProductService.fetchProductByLocation(limit, cursor);
 
         return res.status(200).json({
             message: "Product Fetched Successfully",

@@ -26,5 +26,56 @@ CREATE TABLE users (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_role ON users(role);
+
+
+CREATE TYPE order_status AS ENUM(
+  'REQUESTED'     -- buyer asked
+  'ACCEPTED'      -- seller accepted
+  'REJECTED'     -- seller rejected
+  'READY'         -- packed / ready for pickup
+  'PICKED_UP'     -- delivery partner picked
+  'DELIVERED'     -- completed
+  'CANCELLED'     -- expired / cancelled
+
+)
+
+CREATE TYPE delivery_type AS ENUM(
+  'HOME_DELIVERY',
+  'PICK_UP'
+)
+
+create TABLE orders(
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  buyer_id UUID NOT NULL,
+  seller_id UUID NOT NULL,
+
+  status order_status NOT NULL DEFAULT 'REQUESTED',
+  delivery delivery_type NOT NULL DEFAULT 'HOME_DELIVERY',
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  expires_at TIMESTAMPTZ NOT NULL
+
+);
+
+CREATE INDEX idx_orders_buyer_id ON orders(buyer_id);
+CREATE INDEX idx_orders_seller_id ON orders(seller_id);
+CREATE INDEX idx_orders_status ON orders(status);
+
+
+CREATE TABLE order_items(
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  order_id UUID NOT NULL,
+  product_id VARCHAR(100) NOT NULL,
+
+  quantity INTEGER NOT NULL CHECK(quantity>0) ,
+  price_snapshot NUMERIC(10,2) NOT NULL,
+  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE;
+)
+
+
+CREATE INDEX idx_order_items_order_id ON order_items(order_id);

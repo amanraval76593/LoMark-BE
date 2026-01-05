@@ -12,14 +12,14 @@ export class ProductRepository {
 
         const query = cursor ? { _id: { $lt: cursor }, sellerId: sellerId } : { sellerId: sellerId };
 
-        return ProductModel.find(query).sort({ _id: -1 }).limit(limit + 1);
+        return ProductModel.find(query).sort({ _id: -1 }).limit(limit + 1).lean();
     }
 
     static async fetchByLocation(limit: number, cursor: string | undefined) {
 
         const query = cursor ? { _id: { $lt: cursor } } : {};
 
-        return ProductModel.find(query);
+        return ProductModel.find(query).sort({ _id: -1 }).limit(limit + 1).lean();
     }
 
 }
