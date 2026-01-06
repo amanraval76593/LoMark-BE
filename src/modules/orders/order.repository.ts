@@ -11,7 +11,7 @@ export class orderRepsitory {
                 seller_id,
                 status,
                 delivery,
-                expired_at
+                expires_at
             )
             VALUES($1,$2,$3,$4,$5)
             RETURNING *
@@ -31,7 +31,7 @@ export class orderRepsitory {
                 quantity,
                 price_snapshot
             )
-            VALUES[$1,$2,$3,$4]
+            VALUES ($1,$2,$3,$4)
             RETURNING *
             `,
             [product.orderId, product.id, product.quantity, product.price]
