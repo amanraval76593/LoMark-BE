@@ -5,7 +5,7 @@ export interface orderDTO {
     userId: string,
     sellerId: string,
     deliveryType: DeliveryType,
-    productList: Promise<ProductDTO>[];
+    productList: ProductDTO[];
 }
 
 export interface ProductDTO {

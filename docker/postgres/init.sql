@@ -32,20 +32,20 @@ CREATE INDEX idx_users_role ON users(role);
 
 
 CREATE TYPE order_status AS ENUM(
-  'REQUESTED'     -- buyer asked
-  'ACCEPTED'      -- seller accepted
-  'REJECTED'     -- seller rejected
-  'READY'         -- packed / ready for pickup
-  'PICKED_UP'     -- delivery partner picked
-  'DELIVERED'     -- completed
-  'CANCELLED'     -- expired / cancelled
+  'REQUESTED',
+  'ACCEPTED',
+  'REJECTED',
+  'READY',
+  'PICKED_UP',
+  'DELIVERED',
+  'CANCELLED',
 
-)
+);
 
 CREATE TYPE delivery_type AS ENUM(
   'HOME_DELIVERY',
   'PICK_UP'
-)
+);
 
 create TABLE orders(
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -74,8 +74,8 @@ CREATE TABLE order_items(
 
   quantity INTEGER NOT NULL CHECK(quantity>0) ,
   price_snapshot NUMERIC(10,2) NOT NULL,
-  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE;
-)
+  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+);
 
 
 CREATE INDEX idx_order_items_order_id ON order_items(order_id);
