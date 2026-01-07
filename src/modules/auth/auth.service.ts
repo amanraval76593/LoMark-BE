@@ -1,5 +1,6 @@
 import config from "../../config";
 import { UserRow } from "../../database";
+import redisClient from "../../database/redis";
 import { BadRequestError, UnauthorizedError } from "../../errors/app.error";
 import { AuthResponse, LoginDTO, RegisterDTO } from "./auth.interface";
 import { AuthRepository } from "./auth.repository";
@@ -51,7 +52,7 @@ export class AuthService {
             config.JWT_SECRET,
             { expiresIn: "1d" }
         )
-
+        await redisClient.set(user.id, user.name, "EX", 300)
         const { password_hash, ...safeUser } = user;
 
         return { token: token, user: safeUser }
