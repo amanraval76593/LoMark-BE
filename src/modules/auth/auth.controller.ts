@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { AuthService } from "./auth.service";
+import redisClient from "../../database/redis";
 
 
 export class AuthController {
@@ -23,6 +24,7 @@ export class AuthController {
     static async profile(req: Request, res: Response, next: NextFunction) {
         try {
             const user = req.user!;
+            const name = await redisClient.get(user.id)
             res.status(200).json(user);
         } catch (err) {
             next(err)
