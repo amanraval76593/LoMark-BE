@@ -1,6 +1,6 @@
 -- Enable UUID generation
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
+CREATE EXTENSION IF NOT EXISTS postgis;
 -- User roles enum
 CREATE TYPE user_role AS ENUM (
   'USER',
@@ -16,6 +16,7 @@ CREATE TABLE users (
   name VARCHAR(100) NOT NULL,
   email VARCHAR(255) NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
+  location GEOGRAPHY(Point, 4326),
 
   role user_role NOT NULL DEFAULT 'USER',
 
@@ -38,7 +39,7 @@ CREATE TYPE order_status AS ENUM(
   'READY',
   'PICKED_UP',
   'DELIVERED',
-  'CANCELLED',
+  'CANCELLED'
 
 );
 
@@ -74,7 +75,7 @@ CREATE TABLE order_items(
 
   quantity INTEGER NOT NULL CHECK(quantity>0) ,
   price_snapshot NUMERIC(10,2) NOT NULL,
-  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE;
 );
 
 
