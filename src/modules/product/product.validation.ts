@@ -17,3 +17,10 @@ export const fetchProductForSellerSchema = z.object({
     cursor: z.string().optional()
 })
 
+export const checkProductStockSchema=z.object({
+    body:z.object({
+        productId:z.string(),
+        stock:z.number().min(1)
+    })
+})
+

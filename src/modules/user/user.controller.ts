@@ -8,7 +8,7 @@ export class UserController {
             const user = req.user;
 
             const { longitude, latitude } = req.body;
-            const response = UserService.assignLocationToSeller(user, longitude, latitude);
+            const response = await UserService.assignLocationToSeller(user, longitude, latitude);
 
             res.status(200).json({ response });
 
@@ -22,7 +22,7 @@ export class UserController {
 
             const user = req.user;
 
-            const response = UserService.fetchSellerLocation(user);
+            const response =await  UserService.fetchSellerLocation(user);
 
             res.status(200).json({ response });
 

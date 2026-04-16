@@ -1,7 +1,7 @@
 import { Order, OrderItems, postgresPool } from "../../database";
 import { orderEntity, productEntity } from "./order.interface";
 
-export class orderRepsitory {
+export class orderRepository {
 
     static async createOrder(order: orderEntity): Promise<Order> {
         const result = await postgresPool.query<Order>(
