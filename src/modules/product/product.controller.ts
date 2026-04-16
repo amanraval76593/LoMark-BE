@@ -20,7 +20,7 @@ export class ProductController {
             })
 
         } catch (error) {
-            next(error)
+            next(error);
         }
 
     }
@@ -40,13 +40,14 @@ export class ProductController {
             })
 
         } catch (error) {
-            next(error)
+            next(error);
         }
     }
 
     static async fetchProductByLocation(req: Request, res: Response, next: NextFunction) {
 
-        const limit = Math.min(Number(req.query.limit) || 10, 100);
+        try{
+            const limit = Math.min(Number(req.query.limit) || 10, 100);
         const cursor = req.query.cursor as string || undefined;
 
         const productList = await ProductService.fetchProductByLocation(limit, cursor);
@@ -55,5 +56,24 @@ export class ProductController {
             message: "Product Fetched Successfully",
             data: productList
         })
+        }catch(error){
+            next(error);
+        }
+    }
+
+    static async checkProductStock(req:Request,res:Response,next:NextFunction){
+        try{   
+
+            const {productId,stock}=req.body;
+
+            const response=await ProductService.checkProductStock(productId,stock);
+
+            return res.status(200).json({
+                data:response
+            });
+
+        }catch(error){
+            next(error);
+        }
     }
 }

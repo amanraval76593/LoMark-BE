@@ -22,4 +22,12 @@ export class ProductRepository {
         return ProductModel.find(query).sort({ _id: -1 }).limit(limit + 1).lean();
     }
 
+    static async checkProductStock(productId:string,quantity:number):Promise<boolean>{
+        const product = await ProductModel.findById(productId).lean();
+
+        if(!product) return false;
+
+        return product.stock >= quantity;
+    }
+
 }

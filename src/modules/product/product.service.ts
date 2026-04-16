@@ -42,4 +42,13 @@ export class ProductService {
         }
     }
 
+    static async checkProductStock(productId:string,stock:number){
+
+        const result=await ProductRepository.checkProductStock(productId,stock);
+
+        return {
+            stockAvailable:result
+        }
+    }
+
 }
