@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ProductService } from "./product.service";
+import { ICreateProductInput } from "./product.interface";
 
 export class ProductController {
 
@@ -8,11 +9,16 @@ export class ProductController {
 
             const user = req.user!;
 
-            const product = await ProductService.addProduct({
-                ...req.body,
-                sellerId: user.id,
-                isActive: true
-            });
+            const productPayload: ICreateProductInput = {
+                name: req.body.name,
+                category: String(req.body.category).toLowerCase() as ICreateProductInput["category"],
+                description:req.body.description,
+                price: req.body.price,
+                quantity: req.body.quantity,
+                is_available: req.body.is_available
+            };
+
+            const product = await ProductService.addProduct(user.id, productPayload);
 
             return res.status(200).json({
                 message: "Product Added Successfully",
@@ -48,14 +54,17 @@ export class ProductController {
 
         try{
             const limit = Math.min(Number(req.query.limit) || 10, 100);
-        const cursor = req.query.cursor as string || undefined;
+            const cursor = req.query.cursor as string || undefined;
 
-        const productList = await ProductService.fetchProductByLocation(limit, cursor);
+            const latitude = Number(req.query.latitude);
+            const longitude = Number(req.query.longitude);
 
-        return res.status(200).json({
-            message: "Product Fetched Successfully",
-            data: productList
-        })
+            const productList = await ProductService.fetchProductByLocation(longitude, latitude, limit, cursor);
+
+            return res.status(200).json({
+                message: "Product Fetched Successfully",
+                data: productList
+            });
         }catch(error){
             next(error);
         }
@@ -64,9 +73,9 @@ export class ProductController {
     static async checkProductStock(req:Request,res:Response,next:NextFunction){
         try{   
 
-            const {productId,stock}=req.body;
+            const {productId,quantity}=req.body;
 
-            const response=await ProductService.checkProductStock(productId,stock);
+            const response=await ProductService.checkProductStock(productId,quantity);
 
             return res.status(200).json({
                 data:response
