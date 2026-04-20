@@ -8,45 +8,81 @@ const productSchema = new Schema<IProduct>({
         required: true,
         trim: true
     },
-    description: {
-        type: String
-    },
     category: {
         type: String,
         enum: ProductCategory,
         required: true,
         index: true
     },
+    description:{
+        type:String,
+    },
     price: {
         type: Number,
         required: true,
         min: 0
     },
-    unit: {
-        type: String,
-        enum: ["kg", "piece", "litre", "pack"],
-        required: true
-    },
-    sellerId: {
-        type: String,
-        required: true,
-        index: true
-    },
-    stock: {
+    quantity: {
         type: Number,
         required: true,
         min: 0
     },
-    isActive: {
-        type: Boolean,
-        default: true
+    seller_id: {
+        type: String,
+        required: true,
+        index: true
     },
-
+    is_available: {
+        type: Boolean,
+        default: true,
+        index: true
+    },
+    seller: {
+        location: {
+            type: {
+                type: String,
+                enum: ["Point"],
+                default: "Point",
+                required: true
+            },
+            coordinates: {
+                type: [Number],
+                required: true,
+                validate: {
+                    validator: (coordinates: number[]) => coordinates.length === 2,
+                    message: "Coordinates must contain longitude and latitude",
+                }
+            }
+        },
+        delivery_radius_km: {
+            type: Number,
+            required: true,
+            min: 0
+        }
+    },
+    rating: {
+        avg: {
+            type: Number,
+            default: 0,
+            min: 0
+        },
+        count: {
+            type: Number,
+            default: 0,
+            min: 0
+        }
+    },
 },
     {
-        timestamps: true,
+        timestamps: {
+            createdAt: "created_at",
+            updatedAt: "updated_at",
+        },
     }
 );
+
+productSchema.index({ "seller.location": "2dsphere" });
+
 export const ProductModel = mongoose.model<IProduct>(
     "Product",
     productSchema
