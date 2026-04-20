@@ -1,0 +1,1 @@
+export { default as SellerRouter } from "./seller.routes"
