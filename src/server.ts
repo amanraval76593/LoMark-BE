@@ -7,5 +7,15 @@ const port = config.PORT || 5000;
     await connectPostgres();
     await connectMongo();
 
-    app.listen(port, () => console.log(`Server is running and listning to Port ${port}`))
+    const server = app.listen(port, () => console.log(`Server is running and listening on port ${port}`))
+
+    server.on('error', (error: NodeJS.ErrnoException) => {
+        if (error.code === 'EADDRINUSE') {
+            console.error(`Port ${port} is already in use. Update PORT in .env or stop the process using that port.`)
+            process.exit(1)
+        }
+
+        console.error('Failed to start server:', error.message)
+        process.exit(1)
+    })
 })();
