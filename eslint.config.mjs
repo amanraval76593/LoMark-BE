@@ -36,7 +36,7 @@ export default defineConfig([
       'comma-dangle': ['error', 'always-multiline'],
       'object-curly-spacing': ['error', 'always'],
       'arrow-parens': ['error', 'always'],
-      'max-len': ['warn', { code: 100 }],
+      'max-len': ['warn', { code: 150 }],
 
       // -------- TypeScript rules --------
       '@typescript-eslint/no-unused-vars': 'off',

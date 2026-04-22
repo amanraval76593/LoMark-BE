@@ -1,1 +1,1 @@
-export { default as ProductRouter } from "./product.router"
+export { default as ProductRouter } from './product.router';

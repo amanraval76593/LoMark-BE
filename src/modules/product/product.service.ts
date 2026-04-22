@@ -72,6 +72,17 @@ export class ProductService {
     };
   }
 
+  static async fetchProductById(productId:string){
+
+    const product=await ProductRepository.fetchProductById(productId);
+
+    if(!product){
+      throw new BadRequestError('No product record found');
+    }
+
+    return product;
+
+  }
   static async checkProductStock(productId:string,quantity:number){
 
     const result=await ProductRepository.checkProductStock(productId,quantity);

@@ -1,3 +1,4 @@
+import type { ClientSession } from 'mongoose';
 import mongoose from 'mongoose';
 import type { IProduct, IUpdateProductInput } from './product.interface';
 import { ProductModel } from './product.model';
@@ -62,6 +63,11 @@ export class ProductRepository {
     ]);
   }
 
+  static async fetchProductById(productId:string){
+    const product=ProductModel.findById(productId);
+
+    return product;
+  }
   static async checkProductStock(productId:string,quantity:number):Promise<boolean>{
     const product = await ProductModel.findById(productId).lean();
 
@@ -74,8 +80,62 @@ export class ProductRepository {
     return ProductModel.findOneAndUpdate(
       { _id: productId, seller_id: sellerId },
       { $set: updateData },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     ).lean();
+  }
+
+  static async fetchByIdsAndSellerId(productIds: string[], sellerId: string, session?: ClientSession) {
+    const query = ProductModel.find({
+      _id: { $in: productIds },
+      seller_id: sellerId,
+    });
+
+    if (session) {
+      query.session(session);
+    }
+
+    return query.lean();
+  }
+
+  static async deductInventory(
+    productId: string,
+    sellerId: string,
+    quantity: number,
+    nextAvailability: boolean,
+    session?: ClientSession,
+  ) {
+    return ProductModel.updateOne(
+      {
+        _id: productId,
+        seller_id: sellerId,
+        is_available: true,
+        quantity: { $gte: quantity },
+      },
+      {
+        $inc: { quantity: -quantity },
+        $set: { is_available: nextAvailability },
+      },
+      session ? { session } : undefined,
+    );
+  }
+
+  static async restoreInventory(
+    productId: string,
+    sellerId: string,
+    quantity: number,
+    session?: ClientSession,
+  ) {
+    return ProductModel.updateOne(
+      {
+        _id: productId,
+        seller_id: sellerId,
+      },
+      {
+        $inc: { quantity: quantity },
+        $set: { is_available: true },
+      },
+      session ? { session } : undefined,
+    );
   }
 
 

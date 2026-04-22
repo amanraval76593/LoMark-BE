@@ -14,11 +14,11 @@ export enum DeliveryType {
 }
 
 export const OrderTransition = {
-    REQUESTED: ['ACCEPTED', 'REJECTED', 'CANCELLED'],
-    ACCEPTED: ['READY', 'CANCELLED'],
-    READY: ['PICKED_UP'],
-    PICKED_UP: ['DELIVERED'],
-    DELIVERED: [],
-    REJECTED: [],
-    CANCELLED: []
+  REQUESTED: ['ACCEPTED', 'REJECTED', 'CANCELLED'],
+  ACCEPTED: ['READY', 'CANCELLED'],
+  READY: ['PICKED_UP'],
+  PICKED_UP: ['DELIVERED'],
+  DELIVERED: [],
+  REJECTED: [],
+  CANCELLED: [],
 };
