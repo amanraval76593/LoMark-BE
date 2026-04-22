@@ -1,10 +1,10 @@
-import { DeliveryType, OrderStatus } from "../modules/orders";
+import type { DeliveryType, OrderStatus } from '../modules/orders';
 
 export type UserRole =
-    | "USER"
-    | "FARMER"
-    | "DELIVERY_PARTNER"
-    | "ADMIN";
+    | 'USER'
+    | 'FARMER'
+    | 'DELIVERY_PARTNER'
+    | 'ADMIN';
 
 export interface UserRow {
     id: string;
@@ -24,7 +24,9 @@ export interface Order {
     seller_id: string,
     status: OrderStatus,
     delivery: DeliveryType,
+    total_amount: number,
     created_at: Date;
+    updated_at: Date;
     expired_at: Date;
 }
 
@@ -32,6 +34,8 @@ export interface OrderItems {
     id: string,
     order_id: string,
     product_id: string,
+    product_name: string,
     quantity: number,
-    price_snapshot: number
+    price_snapshot: number,
+    created_at: Date,
 }

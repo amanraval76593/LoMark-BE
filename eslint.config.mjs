@@ -25,15 +25,18 @@ export default defineConfig([
         project: './tsconfig.json',
       },
     },
+    plugins: {
+      'unused-imports': unusedImports,
+    },
     rules: {
       // -------- Formatting (Prettier alternative) --------
-      'semi': ['error', 'always'],
-      'quotes': ['error', 'single'],
-      'indent': ['error', 2],
+      semi: ['error', 'always'],
+      quotes: ['error', 'single'],
+      indent: ['error', 2],
       'comma-dangle': ['error', 'always-multiline'],
       'object-curly-spacing': ['error', 'always'],
       'arrow-parens': ['error', 'always'],
-      'max-len': ['warn', { code: 100 }],
+      'max-len': ['warn', { code: 150 }],
 
       // -------- TypeScript rules --------
       '@typescript-eslint/no-unused-vars': 'off',
@@ -42,6 +45,7 @@ export default defineConfig([
 
       // -------- Clean imports --------
       'no-unused-vars': 'off',
+      'unused-imports/no-unused-imports': 'warn',
     },
   },
 ]);

@@ -1,1 +1,1 @@
-export { default as SellerRouter } from "./seller.routes"
+export { default as SellerRouter } from './seller.routes';

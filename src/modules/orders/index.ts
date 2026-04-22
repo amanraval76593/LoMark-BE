@@ -1,2 +1,2 @@
-export * from "./order.type"
-export { default as OrderRouter } from "./order.router"
+export * from './order.type';
+export { default as OrderRouter } from './order.router';
