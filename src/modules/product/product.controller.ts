@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ProductService } from "./product.service";
-import { ICreateProductInput } from "./product.interface";
+import { ICreateProductInput, IUpdateProductInput } from "./product.interface";
 
 export class ProductController {
 
@@ -15,6 +15,7 @@ export class ProductController {
                 description:req.body.description,
                 price: req.body.price,
                 quantity: req.body.quantity,
+                quantity_unit:req.body.quantity_unit,
                 is_available: req.body.is_available
             };
 
@@ -82,6 +83,29 @@ export class ProductController {
             });
 
         }catch(error){
+            next(error);
+        }
+    }
+
+    static async updateProduct(req: Request, res: Response, next: NextFunction) {
+        try {
+            const user = req.user!;
+            const { productId } = req.params;
+
+            const updatePayload: IUpdateProductInput = {
+                description: req.body.description,
+                price: req.body.price,
+                quantity: req.body.quantity,
+                quantity_unit: req.body.quantity_unit ? String(req.body.quantity_unit).toLowerCase() as IUpdateProductInput["quantity_unit"] : undefined,
+            };
+
+            const updatedProduct = await ProductService.updateProduct(user.id, productId, updatePayload);
+
+            return res.status(200).json({
+                message: "Product updated successfully",
+                product: updatedProduct,
+            });
+        } catch (error) {
             next(error);
         }
     }

@@ -1,11 +1,17 @@
 import { z } from "zod"
-import { ProductCategory } from "./product.type";
+import { ProductCategory, QuantityType } from "./product.type";
 
 const productCategorySchema = z
     .string()
     .trim()
     .toLowerCase()
     .pipe(z.enum(ProductCategory));
+
+const quantityUnitSchema=z
+    .string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.enum(QuantityType));
 
 export const createProductSchema = z.object({
     body: z.object({
@@ -14,6 +20,7 @@ export const createProductSchema = z.object({
         category: productCategorySchema,
         price: z.number().positive(),
         quantity: z.number().int().nonnegative(),
+        quantity_unit:quantityUnitSchema,
         is_available: z.boolean().optional()
     }),
 });
@@ -39,3 +46,20 @@ export const checkProductStockSchema=z.object({
         quantity:z.number().int().min(1)
     })
 })
+
+export const updateProductSchema = z.object({
+    params: z.object({
+        productId: z.string().trim().min(1),
+    }),
+    body: z.object({
+        description: z.string().min(4).optional(),
+        price: z.number().positive().optional(),
+        quantity: z.number().int().nonnegative().optional(),
+        quantity_unit: quantityUnitSchema.optional(),
+    }).refine(
+        (data) => Object.keys(data).length > 0,
+        {
+            message: "At least one field is required to update the product",
+        }
+    ),
+});
