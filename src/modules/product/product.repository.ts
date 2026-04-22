@@ -132,7 +132,7 @@ export class ProductRepository {
       },
       {
         $inc: { quantity: quantity },
-        $set: { is_available: true },
+        $set: { is_available: (quantity > 0) },
       },
       session ? { session } : undefined,
     );
