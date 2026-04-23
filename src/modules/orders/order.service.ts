@@ -98,7 +98,7 @@ export class OrderService {
 
       totalPrice += Number(product.price) * requestedProduct.quantity;
     }
-
+    const actuallyDeducted: ReservedProduct[] = [];
     for (const requestedProduct of normalizedProductList) {
       const product = productMap.get(requestedProduct.id)!;
       const remainingQuantity = product.quantity - requestedProduct.quantity;
@@ -113,12 +113,13 @@ export class OrderService {
       if (updateResult.modifiedCount !== 1) {
         throw new BadRequestError(`Unable to reserve inventory for product ${requestedProduct.id}`);
       }
+      actuallyDeducted.push({
+        id: requestedProduct.id,
+        quantity: requestedProduct.quantity,
+      });
     }
 
-    setDeductedProducts(normalizedProductList.map((product) => ({
-      id: product.id,
-      quantity: product.quantity,
-    })));
+    setDeductedProducts(actuallyDeducted);
 
     return this.createPostgresOrder(data, normalizedProductList, expiredTime, productMap, totalPrice);
   }
