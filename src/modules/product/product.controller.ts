@@ -14,7 +14,7 @@ export class ProductController {
         category: String(req.body.category).toLowerCase() as ICreateProductInput['category'],
         description:req.body.description,
         price: req.body.price,
-        quantity: req.body.quantity,
+        total_quantity: req.body.total_quantity,
         quantity_unit:req.body.quantity_unit,
         is_available: req.body.is_available,
       };
@@ -110,7 +110,7 @@ export class ProductController {
       const updatePayload: IUpdateProductInput = {
         description: req.body.description,
         price: req.body.price,
-        quantity: req.body.quantity,
+        total_quantity: req.body.total_quantity,
         quantity_unit: req.body.quantity_unit ? String(req.body.quantity_unit).toLowerCase() as IUpdateProductInput['quantity_unit'] : undefined,
       };
 

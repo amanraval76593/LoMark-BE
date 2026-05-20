@@ -19,7 +19,7 @@ export const createProductSchema = z.object({
     description:z.string().min(4),
     category: productCategorySchema,
     price: z.number().positive(),
-    quantity: z.number().int().nonnegative(),
+    total_quantity: z.number().int().nonnegative(),
     quantity_unit:quantityUnitSchema,
     is_available: z.boolean().optional(),
   }),
@@ -60,7 +60,7 @@ export const updateProductSchema = z.object({
   body: z.object({
     description: z.string().min(4).optional(),
     price: z.number().positive().optional(),
-    quantity: z.number().int().nonnegative().optional(),
+    total_quantity: z.number().int().nonnegative().optional(),
     quantity_unit: quantityUnitSchema.optional(),
   }).refine(
     (data) => Object.keys(data).length > 0,

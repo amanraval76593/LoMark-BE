@@ -22,9 +22,21 @@ const productSchema = new Schema<IProduct>({
     required: true,
     min: 0,
   },
-  quantity: {
+  total_quantity: {
     type: Number,
     required: true,
+    min: 0,
+  },
+  reserved_quantity: {
+    type: Number,
+    required: true,
+    default: 0,
+    min: 0,
+  },
+  sold_quantity: {
+    type: Number,
+    required: true,
+    default: 0,
     min: 0,
   },
   quantity_unit:{
@@ -83,10 +95,16 @@ const productSchema = new Schema<IProduct>({
     createdAt: 'created_at',
     updatedAt: 'updated_at',
   },
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
 },
 );
 
 productSchema.index({ 'seller.location': '2dsphere' });
+
+productSchema.virtual('available_quantity').get(function () {
+  return this.total_quantity - this.reserved_quantity - this.sold_quantity;
+});
 
 export const ProductModel = mongoose.model<IProduct>(
   'Product',

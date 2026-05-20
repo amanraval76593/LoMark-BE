@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DeliveryType } from './order.type';
+import { DeliveryType, OrderStatus } from './order.type';
 
 export const createOrderSchema = z.object({
   body: z.object({
@@ -19,5 +19,14 @@ export const createOrderSchema = z.object({
 export const fetchOrderByIdSchema=z.object({
   params:z.object({
     orderId:z.string().min(1),
+  }),
+});
+
+export const orderActionSchema=z.object({
+  params:z.object({
+    orderId:z.string().min(1),
+  }),
+  body:z.object({
+    action:z.enum([OrderStatus.ACCEPTED, OrderStatus.REJECTED]),
   }),
 });

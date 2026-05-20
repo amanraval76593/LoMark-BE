@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { OrderService } from './order.service';
 import { NotFoundError, UnauthorizedError } from '../../errors/app.error';
+import type { OrderStatus } from './order.type';
 
 export class OrderController {
 
@@ -49,7 +50,6 @@ export class OrderController {
 
       if(!userId) throw new UnauthorizedError('User Id not found');
 
-
       const response=await OrderService.fetchOrdersForUser(userId);
 
       return res.status(200).json({
@@ -66,10 +66,29 @@ export class OrderController {
 
       if(!userId) throw new UnauthorizedError('User Id not found');
 
-
       const response=await OrderService.fetchOrdersForSeller(userId);
 
       return res.status(200).json({
+        data:response,
+      });
+    }catch(error){
+      next(error);
+    }
+  }
+
+  static async orderAction(req:Request,res:Response,next:NextFunction){
+    try{
+      const sellerId=req.user?.id;
+
+      if(!sellerId) throw new UnauthorizedError('Seller Id not found');
+
+      const { orderId }=req.params;
+      const { action }=req.body as { action: OrderStatus.ACCEPTED|OrderStatus.REJECTED };
+
+      const response=await OrderService.orderAction(orderId, sellerId, action);
+
+      return res.status(200).json({
+        message:`Order ${action.toLowerCase()} successfully`,
         data:response,
       });
     }catch(error){

@@ -17,7 +17,9 @@ export class ProductRepository {
       : undefined;
     const query = objectIdCursor ? { _id: { $lt: objectIdCursor }, seller_id: sellerId } : { seller_id: sellerId };
 
-    return ProductModel.find(query).sort({ _id: -1 }).limit(limit + 1).lean();
+    const products = await ProductModel.find(query).sort({ _id: -1 }).limit(limit + 1).lean();
+
+    return products.map((product) => this.withAvailableQuantity(product));
   }
 
   static async fetchByLocation(longitude:number,latitude:number,limit: number, cursor: string | undefined) {
@@ -45,6 +47,12 @@ export class ProductRepository {
           distance_km: {
             $divide: ['$distance_meters', 1000],
           },
+          available_quantity: {
+            $subtract: [
+              '$total_quantity',
+              { $add: ['$reserved_quantity', '$sold_quantity'] },
+            ],
+          },
         },
       },
       {
@@ -68,20 +76,40 @@ export class ProductRepository {
 
     return product;
   }
+
+  static async fetchProductByIdAndSellerId(productId: string, sellerId: string) {
+    const product = await ProductModel.findOne({ _id: productId, seller_id: sellerId }).lean();
+
+    return product ? this.withAvailableQuantity(product) : null;
+  }
+
   static async checkProductStock(productId:string,quantity:number):Promise<boolean>{
     const product = await ProductModel.findById(productId).lean();
 
     if(!product) return false;
 
-    return product.quantity >= quantity;
+    return this.getAvailableQuantity(product) >= quantity;
   }
 
   static async updateByIdAndSellerId(productId: string, sellerId: string, updateData: IUpdateProductInput & { is_available?: boolean }) {
-    return ProductModel.findOneAndUpdate(
-      { _id: productId, seller_id: sellerId },
+    const query: Record<string, unknown> = { _id: productId, seller_id: sellerId };
+
+    if (typeof updateData.total_quantity === 'number') {
+      query.$expr = {
+        $gte: [
+          updateData.total_quantity,
+          { $add: ['$reserved_quantity', '$sold_quantity'] },
+        ],
+      };
+    }
+
+    const product = await ProductModel.findOneAndUpdate(
+      query,
       { $set: updateData },
       { new: true, runValidators: true },
     ).lean();
+
+    return product ? this.withAvailableQuantity(product) : null;
   }
 
   static async fetchByIdsAndSellerId(productIds: string[], sellerId: string, session?: ClientSession) {
@@ -101,7 +129,6 @@ export class ProductRepository {
     productId: string,
     sellerId: string,
     quantity: number,
-    nextAvailability: boolean,
     session?: ClientSession,
   ) {
     return ProductModel.updateOne(
@@ -109,13 +136,27 @@ export class ProductRepository {
         _id: productId,
         seller_id: sellerId,
         is_available: true,
-        quantity: { $gte: quantity },
+        $expr: {
+          $gte: [
+            { $subtract: ['$total_quantity', { $add: ['$reserved_quantity', '$sold_quantity'] }] },
+            quantity,
+          ],
+        },
       },
-      {
-        $inc: { quantity: -quantity },
-        $set: { is_available: nextAvailability },
-      },
-      session ? { session } : undefined,
+      [
+        {
+          $set: {
+            reserved_quantity: { $add: ['$reserved_quantity', quantity] },
+            is_available: {
+              $gt: [
+                { $subtract: ['$total_quantity', { $add: [{ $add: ['$reserved_quantity', quantity] }, '$sold_quantity'] }] },
+                0,
+              ],
+            },
+          },
+        },
+      ],
+      session ? { session, updatePipeline: true } : { updatePipeline: true },
     );
   }
 
@@ -129,13 +170,34 @@ export class ProductRepository {
       {
         _id: productId,
         seller_id: sellerId,
+        reserved_quantity: { $gte: quantity },
       },
-      {
-        $inc: { quantity: quantity },
-        $set: { is_available: true },
-      },
-      session ? { session } : undefined,
+      [
+        {
+          $set: {
+            reserved_quantity: { $subtract: ['$reserved_quantity', quantity] },
+            is_available: {
+              $gt: [
+                { $subtract: ['$total_quantity', { $add: [{ $subtract: ['$reserved_quantity', quantity] }, '$sold_quantity'] }] },
+                0,
+              ],
+            },
+          },
+        },
+      ],
+      session ? { session, updatePipeline: true } : { updatePipeline: true },
     );
+  }
+
+  private static getAvailableQuantity(product: Pick<IProduct, 'total_quantity' | 'reserved_quantity' | 'sold_quantity'>) {
+    return product.total_quantity - product.reserved_quantity - product.sold_quantity;
+  }
+
+  private static withAvailableQuantity<T extends Pick<IProduct, 'total_quantity' | 'reserved_quantity' | 'sold_quantity'>>(product: T) {
+    return {
+      ...product,
+      available_quantity: this.getAvailableQuantity(product),
+    };
   }
 
 

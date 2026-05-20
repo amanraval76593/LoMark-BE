@@ -18,10 +18,12 @@ export class ProductService {
       category: data.category,
       description:data.description,
       price: data.price,
-      quantity: data.quantity,
+      total_quantity: data.total_quantity,
+      reserved_quantity: 0,
+      sold_quantity: 0,
       quantity_unit:data.quantity_unit,
       seller_id: sellerId,
-      is_available: data.is_available ?? data.quantity > 0,
+      is_available: data.is_available ?? data.total_quantity > 0,
       seller: {
         location: {
           type: 'Point',
@@ -95,8 +97,18 @@ export class ProductService {
   static async updateProduct(sellerId: string, productId: string, data: IUpdateProductInput) {
     const updateData: IUpdateProductInput & { is_available?: boolean } = { ...data };
 
-    if (typeof data.quantity === 'number') {
-      updateData.is_available = data.quantity > 0;
+    if (typeof data.total_quantity === 'number') {
+      const product = await ProductRepository.fetchProductByIdAndSellerId(productId, sellerId);
+
+      if (!product) {
+        throw new NotFoundError('Product not found for this farmer');
+      }
+
+      if (data.total_quantity < product.reserved_quantity + product.sold_quantity) {
+        throw new BadRequestError('Total quantity cannot be less than reserved and sold quantity');
+      }
+
+      updateData.is_available = (data.total_quantity - product.reserved_quantity - product.sold_quantity) > 0;
     }
 
     const updatedProduct = await ProductRepository.updateByIdAndSellerId(productId, sellerId, updateData);
