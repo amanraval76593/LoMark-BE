@@ -1,7 +1,7 @@
-import { ProductCategory, QuantityType } from "./product.type";
+import type { ProductCategory, QuantityType } from './product.type';
 
 export interface IProductLocation {
-    type: "Point";
+    type: 'Point';
     coordinates: [number, number];
 }
 
@@ -20,7 +20,10 @@ export interface IProduct {
     category: ProductCategory;
     description: string;
     price: number;
-    quantity: number;
+    total_quantity: number;
+    reserved_quantity: number;
+    sold_quantity: number;
+    available_quantity?: number;
     quantity_unit:QuantityType;
     seller_id: string;
     is_available: boolean;
@@ -35,7 +38,7 @@ export interface ICreateProductInput {
     category: ProductCategory;
     description: string;
     price: number;
-    quantity: number;
+    total_quantity: number;
     quantity_unit:QuantityType;
     is_available?: boolean;
 }
@@ -43,6 +46,6 @@ export interface ICreateProductInput {
 export interface IUpdateProductInput {
     description?: string;
     price?: number;
-    quantity?: number;
+    total_quantity?: number;
     quantity_unit?: QuantityType;
 }

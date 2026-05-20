@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import type { ClientSession } from 'mongoose';
 import type { PoolClient } from 'pg';
-import { BadRequestError, NotFoundError } from '../../errors/app.error';
+import { BadRequestError, ForbiddenError, NotFoundError } from '../../errors/app.error';
 import { ProductRepository } from '../product/product.repository';
 import type { orderDTO, ProductDTO } from './order.interface';
 import { orderRepository } from './order.repository';
@@ -92,7 +92,9 @@ export class OrderService {
         throw new BadRequestError(`Product ${requestedProduct.id} not found`);
       }
 
-      if (!product.is_available || product.quantity < requestedProduct.quantity) {
+      const availableQuantity = product.total_quantity - product.reserved_quantity - product.sold_quantity;
+
+      if (!product.is_available || availableQuantity < requestedProduct.quantity) {
         throw new BadRequestError(`Product ${requestedProduct.id} does not have enough stock`);
       }
 
@@ -100,13 +102,10 @@ export class OrderService {
     }
     const actuallyDeducted: ReservedProduct[] = [];
     for (const requestedProduct of normalizedProductList) {
-      const product = productMap.get(requestedProduct.id)!;
-      const remainingQuantity = product.quantity - requestedProduct.quantity;
       const updateResult = await ProductRepository.deductInventory(
         requestedProduct.id,
         data.sellerId,
         requestedProduct.quantity,
-        remainingQuantity > 0,
         session,
       );
 
@@ -272,5 +271,62 @@ export class OrderService {
     if(!orders) throw new BadRequestError('No order for the user');
 
     return orders;
+  }
+
+  static async orderAction(
+    orderId:string,
+    sellerId:string,
+    action:OrderStatus.ACCEPTED|OrderStatus.REJECTED,
+  ){
+    const client: PoolClient = await orderRepository.getClient();
+
+    try {
+      await client.query('BEGIN');
+
+      const order=await orderRepository.fetchOrderForSellerById(orderId, sellerId, client);
+
+      if(!order) {
+        const existingOrder=await orderRepository.fetchOrderById(orderId, client);
+
+        if(!existingOrder) throw new NotFoundError('Order not found');
+
+        throw new ForbiddenError('You are not allowed to update this order');
+      }
+
+      if(order.status !== OrderStatus.REQUESTED) {
+        throw new BadRequestError('Only requested orders can be accepted or rejected');
+      }
+
+      const orderItems=action === OrderStatus.REJECTED
+        ? await orderRepository.fetchOrderItems(orderId, client)
+        : [];
+
+      const updatedOrder=await orderRepository.orderAction(orderId, sellerId, action, client);
+
+      if(!updatedOrder) throw new BadRequestError('Failed to update order');
+
+      if(action === OrderStatus.REJECTED) {
+        for(const item of orderItems) {
+          const updateResult=await ProductRepository.restoreInventory(
+            item.product_id,
+            sellerId,
+            item.quantity,
+          );
+
+          if(updateResult.modifiedCount !== 1) {
+            throw new BadRequestError(`Unable to release inventory for product ${item.product_id}`);
+          }
+        }
+      }
+
+      await client.query('COMMIT');
+
+      return updatedOrder;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 }

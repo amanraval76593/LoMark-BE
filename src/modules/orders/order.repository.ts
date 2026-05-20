@@ -2,6 +2,7 @@ import type { PoolClient } from 'pg';
 import type { Order, OrderItems } from '../../database';
 import { postgresPool } from '../../database';
 import type { orderEntity, productEntity } from './order.interface';
+import { OrderStatus } from './order.type';
 
 export class orderRepository {
 
@@ -48,8 +49,9 @@ export class orderRepository {
     return postgresPool.connect();
   }
 
-  static async fetchOrderById(orderId:string){
-    const result=await postgresPool.query<Order>(
+  static async fetchOrderById(orderId:string, client?:PoolClient){
+    const db=client ?? postgresPool;
+    const result=await db.query<Order>(
       `
       SELECT * 
       FROM orders
@@ -62,8 +64,9 @@ export class orderRepository {
     return result.rows[0];
   }
 
-  static async fetchOrderItems(orderId:string){
-    const result =await postgresPool.query<OrderItems>(
+  static async fetchOrderItems(orderId:string, client?:PoolClient){
+    const db=client ?? postgresPool;
+    const result =await db.query<OrderItems>(
       `
         SELECT * 
         FROM order_items
@@ -99,5 +102,35 @@ export class orderRepository {
     );
 
     return result.rows;
+  }
+
+  static async fetchOrderForSellerById(orderId:string, sellerId:string, client:PoolClient){
+    const result=await client.query<Order>(
+      `
+      SELECT *
+      FROM orders
+      WHERE id=$1 AND seller_id=$2
+      LIMIT 1
+      FOR UPDATE
+            `,
+      [orderId, sellerId],
+    );
+
+    return result.rows[0];
+  }
+
+  static async orderAction(orderId:string,sellerId:string,action:OrderStatus.ACCEPTED|OrderStatus.REJECTED,client:PoolClient){
+    const result=await client.query<Order>(
+      `
+      UPDATE orders
+      SET status=$3,
+          updated_at=NOW()
+      WHERE id=$1 AND seller_id=$2 AND status=$4
+      RETURNING *
+            `,
+      [orderId, sellerId, action, OrderStatus.REQUESTED],
+    );
+
+    return result.rows[0];
   }
 }

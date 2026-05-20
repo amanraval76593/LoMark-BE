@@ -1,7 +1,7 @@
 export const ProductCategory = {
-  Vegetables: "vegetables",
-  Fruits: "fruits",
-  Dairy: "dairy",
+  Vegetables: 'vegetables',
+  Fruits: 'fruits',
+  Dairy: 'dairy',
 } as const;
 
 export type ProductCategory = (typeof ProductCategory)[keyof typeof ProductCategory];
@@ -9,18 +9,18 @@ export type ProductCategory = (typeof ProductCategory)[keyof typeof ProductCateg
 
 export const QuantityType = {
   // Weight
-  Kilogram: "kg",
-  Gram: "g",
-  Pound: "lb",
+  Kilogram: 'kg',
+  Gram: 'g',
+  Pound: 'lb',
 
   // Volume
-  Liter: "l",
-  Milliliter: "ml",
+  Liter: 'l',
+  Milliliter: 'ml',
 
   // Count
-  Piece: "piece",
-  Dozen: "dozen",
-  Pack: "pack",
+  Piece: 'piece',
+  Dozen: 'dozen',
+  Pack: 'pack',
 } as const;
 
 export type QuantityType = (typeof QuantityType)[keyof typeof QuantityType];

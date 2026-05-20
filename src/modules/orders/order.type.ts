@@ -8,11 +8,6 @@ export enum OrderStatus {
     CANCELLED = 'CANCELLED'
 }
 
-export enum DeliveryType {
-    HOME_DELIVERY = 'HOME_DELIVERY',
-    PICK_UP = 'PICK_UP'
-}
-
 export const OrderTransition = {
   REQUESTED: ['ACCEPTED', 'REJECTED', 'CANCELLED'],
   ACCEPTED: ['READY', 'CANCELLED'],
@@ -22,3 +17,18 @@ export const OrderTransition = {
   REJECTED: [],
   CANCELLED: [],
 };
+
+export enum PaymentStatus{
+    NOT_REQUIRED='NOT_REQUIRED',
+    PENDING='PENDING',
+    PAID='PAID',
+    FAILED='FAILED',
+    REFUNDED='REFUNDED',
+    EXPIRED='EXPIRED',
+}
+export enum DeliveryType {
+    HOME_DELIVERY = 'HOME_DELIVERY',
+    PICK_UP = 'PICK_UP'
+}
+
+
